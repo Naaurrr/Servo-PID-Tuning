@@ -25,6 +25,7 @@ data_id = iddata(y_filtered, u, Ts);
 % Try lower model order first
 sys_tf = tfest(data_id, 2, 1);
 fprintf('Model Fit Accuracy: %.2f%%\n', sys_tf.Report.Fit.FitPercent);
+
 % Discretize it
 sys_d = c2d(sys_tf, Ts, 'zoh');
 
