@@ -51,11 +51,30 @@ This study measures those dynamics directly from hardware using a potentiometer 
 ## Results
 
 ### Identified Transfer Function
+- **Model fit accuracy:** 88.80%
 - **Model order:** 2nd order, 1 zero
-- **Sampling time:** Ts = 0.0210 s (≈ 50 Hz)
 - **Fit method:** `tfest` via MATLAB System Identification Toolbox
 
-### Tuned PID Gains
+The identified continuous-time transfer function:
+
+```
+        0.5556s + 0.2407
+G(s) = ------------------
+       s² + 46.03s + 3.08e-10
+```
+
+| Property | Value |
+|----------|-------|
+| Numerator | [0.5556, 0.2407] |
+| Denominator | [1, 46.0310, 3.0785e-10] |
+| Noise Variance | 0.1947 |
+| Model Fit | 88.80% |
+
+The near-zero constant term in the denominator (3.08e-10) indicates the servo behaves close to an integrating system at low frequencies — meaning without feedback it drifts rather than holding position, which is exactly the behavior that motivates closed-loop PID control.
+
+### Discretized & Tuned PID Gains
+
+The transfer function was discretized using Zero-Order Hold (ZOH) at Ts = 0.0210 s, then a discrete PID controller was tuned using `pidtune`:
 
 | Parameter | Value |
 |-----------|-------|
@@ -67,11 +86,19 @@ This study measures those dynamics directly from hardware using a potentiometer 
 | Derivative formula | Forward Euler |
 | Sampling time (Ts) | 0.0210 s |
 
+The high Ki value (98.12) relative to Kp (14.50) reflects the integrating nature of the plant — significant integral action is needed to correct steady-state position error.
+
 ### Closed-Loop Step Response
 
 ![Closed-Loop Step Response](step_response.png)
 
-The tuned controller produces a stable closed-loop response with approximately 17% overshoot and settling time around 10 seconds. The response confirms the PID gains are functional and the identified model is a reasonable approximation of the servo's real behavior.
+| Metric | Observed |
+|--------|----------|
+| Overshoot | ~17% |
+| Settling time | ~10 seconds |
+| Steady-state error | ~0 (integral action eliminates it) |
+
+The tuned controller produces a stable closed-loop response. The overshoot and settling time are acceptable for a proof-of-concept servo position controller.
 
 ---
 
@@ -117,4 +144,3 @@ Servo-SysID/
 3. Run the script — it will display the transfer function, PID gains, and plot the step response
 
 **Requirements:** MATLAB with System Identification Toolbox and Control System Toolbox
-
